@@ -1,0 +1,239 @@
+// supabase/functions/_shared/sheetsService.ts
+import { google } from "npm:googleapis@130.0.0";
+
+export class SheetsService {
+  private auth;
+  private sheets;
+
+  constructor() {
+    const base64 = Deno.env.get("GOOGLE_SERVICE_JSON");
+    if (!base64) throw new Error("Missing GOOGLE_SERVICE_JSON");
+
+    // decode base64 credentials (Deno way)
+    const decoded = atob(base64);
+    const credentials = JSON.parse(decoded);
+
+    this.auth = new google.auth.GoogleAuth({
+      credentials,
+      scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+    });
+
+    this.sheets = google.sheets({ version: "v4", auth: this.auth });
+  }
+
+  async appendRow(session: Record<string, any>, phone: string) {
+    const spreadsheetId = Deno.env.get("SPREADSHEET_ID");
+    if (!spreadsheetId) throw new Error("Missing SPREADSHEET_ID");
+
+    const filteredSession = Object.fromEntries(
+      Object.entries(session).filter(
+        ([key]) => !["step", "lang", "substep", "questionIndex"].includes(key)
+      )
+    );
+
+    // format job records
+    if (filteredSession.jobRecords) {
+      try {
+        let jobs = filteredSession.jobRecords;
+        if (typeof jobs === "string") jobs = JSON.parse(jobs);
+        if (Array.isArray(jobs)) {
+          filteredSession.jobRecords = jobs
+            .map(
+              (job) =>
+                `${job.client} | ${job.city} | ${job.area.join(", ")} | ${job.salary}`
+            )
+            .join("\n");
+        }
+      } catch (err) {
+        console.error("Failed to format jobRecords", err);
+      }
+    }
+
+    filteredSession.phone = phone;
+
+    const { answers, ...rest } = filteredSession;
+    const flatAnswers = answers
+      ? Object.entries(answers).reduce((acc, [key, value]) => {
+          if (key === "job_records" && Array.isArray(value)) {
+            acc[key] = value
+              .map(
+                (job) =>
+                  `${job.client} | ${job.city} | ${job.area.join(", ")} | ${job.salary}`
+              )
+              .join("\n");
+          } else {
+            acc[key] = value;
+          }
+          return acc;
+        }, {} as Record<string, any>)
+      : {};
+
+    const flattenedSession = { ...rest, ...flatAnswers };
+
+    // ✅ Ensure consistent header order
+    const fixedFirstCols = [
+      "full_name",
+      "phone",
+      "age",
+      "residence_city",
+      "job_preference_city",
+    ];
+
+    const headersRes = await this.sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: "Sheet1!1:1",
+    });
+
+    let headers: string[] = headersRes.data.values?.[0] || [];
+    headers = headers.filter((h) => h !== "timestamp");
+    headers = [...fixedFirstCols, ...headers.filter((h) => !fixedFirstCols.includes(h))];
+
+    const currentKeys = Object.keys(flattenedSession);
+    for (const key of currentKeys) {
+      if (!headers.includes(key) && key !== "timestamp") {
+        headers.push(key);
+      }
+    }
+    headers.push("timestamp");
+
+    const valuesRow = headers.map((key) => {
+      if (key === "timestamp") return new Date().toLocaleString();
+      if (flattenedSession[key] !== undefined) {
+        return typeof flattenedSession[key] === "object"
+          ? JSON.stringify(flattenedSession[key])
+          : flattenedSession[key];
+      }
+      return "";
+    });
+
+    // update headers row
+    await this.sheets.spreadsheets.values.update({
+      spreadsheetId,
+      range: "Sheet1!A1",
+      valueInputOption: "USER_ENTERED",
+      requestBody: { values: [headers] },
+    });
+
+    // append new row
+    await this.sheets.spreadsheets.values.append({
+      spreadsheetId,
+      range: "Sheet1!A1",
+      valueInputOption: "USER_ENTERED",
+      requestBody: { values: [valuesRow] },
+    });
+  }
+
+  async appendSupportRow(query: string, phone: string) {
+    const spreadsheetId = Deno.env.get("SPREADSHEET_ID");
+    const sheetName = "SupportQueries";
+
+    const headersRes = await this.sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: `${sheetName}!1:1`,
+    });
+
+    let headers: string[] = headersRes.data.values?.[0] || [];
+    const fixedHeaders = ["phone", "query", "timestamp"];
+    headers = [...fixedHeaders, ...headers.filter((h) => !fixedHeaders.includes(h))];
+
+    const valuesRow = headers.map((key) => {
+      if (key === "phone") return phone;
+      if (key === "query") return query;
+      if (key === "timestamp") return new Date().toLocaleString();
+      return "";
+    });
+
+    await this.sheets.spreadsheets.values.update({
+      spreadsheetId,
+      range: `${sheetName}!A1`,
+      valueInputOption: "USER_ENTERED",
+      requestBody: { values: [headers] },
+    });
+
+    await this.sheets.spreadsheets.values.append({
+      spreadsheetId,
+      range: `${sheetName}!A1`,
+      valueInputOption: "USER_ENTERED",
+      requestBody: { values: [valuesRow] },
+    });
+  }
+
+  async appendFeedbackRow(answers: Record<string, any>, phone: string) {
+    const spreadsheetId = Deno.env.get("SPREADSHEET_ID");
+    const sheetName = "Feedback";
+
+    const headersRes = await this.sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: `${sheetName}!1:1`,
+    });
+
+    let headers: string[] = headersRes.data.values?.[0] || [];
+    const fixedHeaders = ["phone", "timestamp"];
+    const answerKeys = Object.keys(answers || {});
+    headers = [...fixedHeaders, ...headers.filter((h) => !fixedHeaders.includes(h)), ...answerKeys];
+
+    const valuesRow = headers.map((key) => {
+      if (key === "phone") return phone;
+      if (key === "timestamp") return new Date().toLocaleString();
+      if (answers[key] !== undefined) {
+        return typeof answers[key] === "object" ? JSON.stringify(answers[key]) : answers[key];
+      }
+      return "";
+    });
+
+    await this.sheets.spreadsheets.values.update({
+      spreadsheetId,
+      range: `${sheetName}!A1`,
+      valueInputOption: "USER_ENTERED",
+      requestBody: { values: [headers] },
+    });
+
+    await this.sheets.spreadsheets.values.append({
+      spreadsheetId,
+      range: `${sheetName}!A1`,
+      valueInputOption: "USER_ENTERED",
+      requestBody: { values: [valuesRow] },
+    });
+  }
+
+  async appendKycRow(answers: Record<string, any>, phone: string) {
+    const spreadsheetId = Deno.env.get("SPREADSHEET_ID");
+    const sheetName = "KYC";
+
+    const headersRes = await this.sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: `${sheetName}!1:1`,
+    });
+
+    let headers: string[] = headersRes.data.values?.[0] || [];
+    const fixedHeaders = ["phone", "timestamp"];
+    const answerKeys = Object.keys(answers || {});
+    headers = [...fixedHeaders, ...headers.filter((h) => !fixedHeaders.includes(h)), ...answerKeys];
+
+    const valuesRow = headers.map((key) => {
+      if (key === "phone") return phone;
+      if (key === "timestamp") return new Date().toLocaleString();
+      if (answers[key] !== undefined) {
+        return typeof answers[key] === "object" ? JSON.stringify(answers[key]) : answers[key];
+      }
+      return "";
+    });
+
+    await this.sheets.spreadsheets.values.update({
+      spreadsheetId,
+      range: `${sheetName}!A1`,
+      valueInputOption: "USER_ENTERED",
+      requestBody: { values: [headers] },
+    });
+
+    await this.sheets.spreadsheets.values.append({
+      spreadsheetId,
+      range: `${sheetName}!A1`,
+      valueInputOption: "USER_ENTERED",
+      requestBody: { values: [valuesRow] },
+    });
+  }
+}
+
+// ✅ export a singleton (Supabase DI style)
+export const sheetService = new SheetsService();
