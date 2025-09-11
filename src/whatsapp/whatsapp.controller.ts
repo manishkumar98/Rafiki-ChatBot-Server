@@ -1,74 +1,90 @@
-// src/whatsapp/whatsapp.controller.ts
+import { Controller, Get, Post, Query, Req, Res } from "@nestjs/common";
+import { ConversationStateService } from "../session/conversation-state.service";
+import { JobService } from "./job.service";
+import { FlowRouter } from "../flows/flow-router.service";
 
-import { Controller, Post, Body, Get, Query, Res } from '@nestjs/common';
-import { WhatsappService } from './whatsapp.service';
-import { FlowService } from '../flow/flow.service';
-import { SessionService } from '../session/session.service';
-import type { Response } from 'express';
 
-@Controller('webhook')
+@Controller("webhook")
 export class WhatsappController {
   constructor(
-    private readonly whatsappService: WhatsappService,
-    private readonly flowService: FlowService,
-    private readonly sessionService: SessionService,
-  ) {}
+    private stateService: ConversationStateService,
+    private jobs: JobService,
+    private flowRouter: FlowRouter,
+  ) { }
 
-  @Get()
-  handleVerification(
-    @Query('hub.mode') mode: string,
-    @Query('hub.challenge') challenge: string,
-    @Query('hub.verify_token') token: string,
-    @Res() res: Response,
-  ) {
-    const VERIFY_TOKEN = process.env.WEBHOOK_VERIFY_TOKEN;
-    console.log('Received Webhook Verification Request:', {
-      mode,
-      challenge,
-      token,
-    });
-    if (mode === 'subscribe' && token === VERIFY_TOKEN) {
-      console.log('Webhook verified successfully.');
-      return res.status(200).send(challenge);
-    } else {
-      console.log('Webhook verification failed.');
-      return res.status(403).send('Forbidden');
-    }
-  }
 
   @Post()
-  async handleWebhook(@Body() body: any) {
-    console.log('Received webhook:', body);
-    const entry = body?.entry?.[0]?.changes?.[0]?.value;
-    const message = entry?.messages?.[0];
-    const phone = message?.from;
-    const text = message?.text?.body;
+  async webhookV1(@Req() req: any) {
+      if (req?.body?.nps) {
+      const from = String(req.body.nps.from || "").trim();
+      const feedbackType = req.body.nps.type;
+      if (!from || !feedbackType) return "NPS: 'from' missing";
 
-    if (!phone || !text) return;
+      this.stateService.reset(from);
+      this.stateService.update(from, {
+        currentFlow: "FEEDBACK",
+        step: 0,
+        feedback_type: feedbackType,
+        nps_feedback_answers: {},
+      });
+      const state = this.stateService.get(from);
+      return this.flowRouter.route("FEEDBACK", from, "__INIT__", state);
+    }
+    const message = req.body.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
+    const from = message?.from;
+    let text: string | undefined = message?.text?.body?.trim();
 
-    const session = this.sessionService.get(phone);
-    console.log(`📂 Retrieved session for ${phone}:`, session);
-    const { reply, newState, isComplete } = this.flowService.handle(
-      session,
-      text,
-    );
-    console.log(
-      `🤖 Reply: "${reply}", New state:`,
-      newState,
-      `Complete: ${isComplete}`,
-    );
-    this.sessionService.set(phone, newState);
+    if (message?.type === "interactive") {
+      const interactiveType = message.interactive?.type;
+      if (interactiveType === "button_reply") {
+        text = message.interactive?.button_reply?.id;
+      } else if (interactiveType === "list_reply") {
+        text = message.interactive?.list_reply?.id;
+      }
+    }else if (["image", "document", "video", "audio"].includes(message?.type)) {
+      text = message; 
+    }
+    
+    if (!from || !text) return "Text or from is missing";
+    console.log(`check type for text`, typeof text, text);
+    if (typeof text === "string" && ["r", "hi", "hello", "start"].includes(text.toLowerCase())) {
+      this.stateService.reset(from);
+      this.stateService.update(from, { currentFlow: "LANGUAGE", step: 0 });
 
-    try {
-      await this.whatsappService.sendText(phone, reply);
-      console.log(`✅ Sent message to ${phone}`);
-    } catch (err) {
-      console.error(`❌ Failed to send message to ${phone}`, err);
+      await this.jobs.sendWhatsAppMessage(from,
+        "👋 Hi! Main hoon Rafiki – aapka dost.\n\nIsse pehle ke hum shuru karein, kripya apni language choose karein:",
+        [
+          { id: "lang_en", title: "English" },
+          { id: "lang_hi", title: "हिंदी" },
+        ]
+      );
+
+      return   `Hi! 👋 Main hoon Rafiki 🙏 
+      Aapke liye job dhoondhne mein madad karunga.
+      Chaliye start karte hain!
+      Choose language:
+      1. English (reply LANG_EN)
+      2. Hindi (reply LANG_HI)`
     }
 
-    if (isComplete) {
-      // TODO: sheetsService.appendRow(session)
-      this.sessionService.clear(phone);
+    const state = this.stateService.get(from);
+    console.log("Current state:", JSON.stringify(state.answers),state.currentFlow, text);
+    return this.flowRouter.route(state.currentFlow ?? "WELCOME", from, text, state)
+  }
+
+
+
+  @Get()
+  async verifyWebhook(
+    @Query("hub.mode") mode: string,
+    @Query("hub.verify_token") token: string,
+    @Query("hub.challenge") challenge: string,
+    @Res() res: any
+  ) {
+    if (mode && token && mode === "subscribe" && token === process.env.WEBHOOK_VERIFY_TOKEN) {
+      console.log("Webhook verified ✅");
+      return res.status(200).send(challenge);
     }
+    return res.sendStatus(403);
   }
 }
