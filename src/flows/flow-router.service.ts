@@ -97,14 +97,14 @@ export class FlowRouter {
           [
             { id: "kyc_instagram", title: "Instagram / Facebook" },
             { id: "kyc_friend", title: lang === "EN" ? "Friend" : "दोस्त" },
-            { id: "kyc_employee", title: lang === "EN" ? "Employee / Rafiki worker" : "कर्मचारी / Rafiki कार्यकर्ता" },
+            { id: "kyc_employee", title: lang === "EN" ? "Employee" : "कर्मचारी" },
           ]
         );
 
         return ` [
           { id: "kyc_instagram", title: "Instagram / Facebook" },
           { id: "kyc_friend", title: lang === "EN" ? "Friend" : "दोस्त" },
-          { id: "kyc_employee", title: lang === "EN" ? "Employee / Rafiki worker" : "कर्मचारी / Rafiki कार्यकर्ता" },
+          { id: "kyc_employee", title: lang === "EN" ? "Employee" : "कर्मचारी" },
         ]`;
       default:
         await this.jobs.sendWhatsAppMessage(
