@@ -250,5 +250,32 @@ async appendKycRow(answers: Record<string, any>, phone: string) {
   });
 }
 
+async readNumbers(): Promise<{ phone: string; type: string }[]> {
+  const spreadsheetId = process.env.SPREADSHEET_ID;
+  const sheetName = "NPS";
+
+  const res = await this.sheets.spreadsheets.values.get({
+    spreadsheetId,
+    range: `${sheetName}!A2:B`,
+  });
+
+  const rows = res.data.values || [];
+  if (!rows.length) return [];
+
+  return rows
+    .map((row, i) => {
+      const phone = String(row[0] || "").trim();
+      const type = String(row[1] || "ALL").trim();
+
+      // ✅ validate phone number (basic check)
+      if (!/^\d{8,15}$/.test(phone)) {
+        console.warn(`Skipping invalid phone at row ${i + 2}: ${phone}`);
+        return null;
+      }
+
+      return { phone, type };
+    })
+    .filter((r) => r !== null) as { phone: string; type: string }[];
+}
 
 }
