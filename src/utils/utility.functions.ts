@@ -27,7 +27,6 @@ export async function handleRoleSelection({
   }
 
   const selectedRole = state.roleMap[selectedIndex];
-
   // ✅ Check age restriction
   const userAge = parseInt(state.answers.age, 10);
   const restriction = roleAgeRestrictions[selectedRole];
@@ -69,7 +68,6 @@ export async function handleRoleSelection({
     state.language,
     state.answers
   );
- 
   if (firstQ) {
      const buttons =
       lang === "HI"
@@ -89,5 +87,5 @@ export async function handleRoleSelection({
     ? `❌ Invalid choice. Please reply with a valid number between 1 and ${Object.keys(
         state.roleMap
       ).length}.`
-    : `❌ गलत विकल्प। कृपया 1 से ${Object.keys(state.roleMap).length} के बीच सही नंबर लिखें।`;
+    : `❌ गलत विकल्प!!!!। कृपया 1 से ${Object.keys(state.roleMap).length} के बीच सही नंबर लिखें।`;
 }

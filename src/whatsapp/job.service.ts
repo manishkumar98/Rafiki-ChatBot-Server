@@ -29,8 +29,7 @@ export class JobService {
 
   async findJobsByCity(city: string) {
     const { data: jobs, error } = await this.supabase
-      .rpc("fuzzy_find_jobs_by_city", { city_input: city });
-
+      .rpc("search_active_jobs", { city_input: city });
     if (error) {
       console.error("❌ RPC error:", error);
       return [];
