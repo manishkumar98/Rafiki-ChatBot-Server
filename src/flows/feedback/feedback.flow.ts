@@ -49,9 +49,48 @@ export class FeedbackFlow {
     }
 
     async handle(from: string, text: string, state: any) {
+        
+
         const lang = this.langOf(state);
         const type = state.feedback_type || "ALL";
         const allQuestions = getQuestionsForType(type);
+        if (state.step === -1) {
+            if (text === "lang_en" || text === "lang_hi") {
+                const lang = text === "lang_hi" ? "HI" : "EN";
+                this.stateService.update(from, { language: lang, step: 0 }); // now start at first feedback Q
+
+                const allQuestions = getQuestionsForType(type);
+                const introQ = allQuestions[0];
+                if (introQ.options) {
+                    await this.jobs.sendWhatsAppMessage(from, introQ.prompt[lang], introQ.options);
+                } else {
+                    await this.jobs.sendWhatsAppMessage(from, introQ.prompt[lang]);
+                }
+                return "Language set, feedback started";
+            } else {
+                await this.jobs.sendWhatsAppMessage(
+                    from,
+                    "❌ Invalid choice. Please select a language:",
+                    [
+                        { id: "lang_en", title: "English" },
+                        { id: "lang_hi", title: "हिंदी" },
+                    ]
+                );
+                return "Invalid language choice";
+            }
+        }
+        if (!state.language) {
+            await this.jobs.sendWhatsAppMessage(
+                from,
+                "👋 Namaste! Aapka feedback humare liye important hai — humein aapka experience 🏡🍴💼 jaanna hai 🙂.  🙏 Apni language choose karein feedback dene ke liye / कृपया अपनी भाषा चुनें:",
+                [
+                    { id: "lang_en", title: "English" },
+                    { id: "lang_hi", title: "हिंदी" },
+                ]
+            );
+            this.stateService.update(from, { currentFlow: "FEEDBACK", step: -1 }); // step -1 = waiting for language
+            return "Awaiting language selection";
+        }
 
         if (text === "__INIT__") {
             const startIdx = this.nextIndex(allQuestions, state.nps_feedback_answers || {}, 0);

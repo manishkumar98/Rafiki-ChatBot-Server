@@ -15,8 +15,8 @@ export const FEEDBACK_SETS: Record<"NEST" | "FOOD" | "JOB" | "OVERALL", Feedback
       key: "nestIntro",
       type: "text",
       prompt: {
-       EN: "👋 Hi! We’d love your feedback on your *Nest* stay. If you didn’t stay, just press No to exit 🙂",
-       HI: "👋 नमस्ते! हमें आपके *Nest* ठहराव पर आपका फ़ीडबैक चाहिए। अगर आपने ठहराव नहीं किया, तो बाहर निकलने के लिए 'नहीं' दबाएँ 🙂",
+       EN: "👋 Hi! We’d love your feedback on your *Nest* stay. If you didn’t stay, just press No to exit.  If yes, press Yes to continue for feedback 🙂",
+       HI: "👋 नमस्ते! हमें आपके *Nest* ठहराव पर आपका फ़ीडबैक चाहिए। अगर आपने ठहराव नहीं किया, तो बाहर निकलने के लिए 'नहीं' दबाएँ 🙂। अगर हाँ, तो 'हाँ' दबाएँ ताकि हम आपका फ़ीडबैक ले सकें",
       },
       options: [
         { id: "continue", title: "✅ हाँ" },
