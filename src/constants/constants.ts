@@ -243,7 +243,7 @@ Aadhar_OTP: {
     HI: "📖 क्या आप इंग्लिश पढ़ सकते हो? 🙂 | ☺️ आपको इंग्लिश समझ आती है? ✅",
   },
 Male_Gender: {
-  EN: "👨 Are you male? 🙂 | ☺️ Please confirm your gender: male ✅",
+  EN: "👨 Are you male? 🙂 | ☺️ Please confirm if you are male ✅",
   HI: "👨 क्या आप पुरुष हैं? 🙂 | ☺️ कृपया बताइए, आप पुरुष हैं? ✅",
 },
  Exp_Ecom_3yr: {
