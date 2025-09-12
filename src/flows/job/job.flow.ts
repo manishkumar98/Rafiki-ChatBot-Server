@@ -455,7 +455,7 @@ export class JobFlow {
             : "🚀 अब हम आपका KYC प्रक्रिया शुरू कर रहे हैं। 📑 इसके लिए आधार, पैन और बैंक प्रूफ अनिवार्य है। क्या आपके पास तैयार है?";
         await this.jobs.sendWhatsAppMessage(from, msg, [
           { id: "continue", title: lang === "EN" ? "✅ Continue" : "✅ जारी रखें" },
-          { id: "exit", title: lang === "EN" ? "🚪 Exit" : "🚪 बाहर निकलें" },
+          { id: "exit", title: lang === "EN" ? "❌ Exit" : "❌बाहर निकलें" },
         ]);
         return msg;
       } else {
