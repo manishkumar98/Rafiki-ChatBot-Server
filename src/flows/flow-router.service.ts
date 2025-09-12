@@ -56,15 +56,15 @@ export class FlowRouter {
       lang === "EN" ? "Aapko kis prakar ki madad chahiye?💼🚀" : "आपको किस प्रकार की मदद चाहिए?",
       [
         { id: "menu_job", title: lang === "EN" ? "Job Opportunities" : "नौकरी" },
-        { id: "menu_support", title: lang === "EN" ? "Support" : "सहायता" },
-        { id: "menu_kyc", title: lang === "EN" ? "KYC" : "KYC" },
+        { id: "menu_kyc", title: lang === "EN" ? "Complete KYC" : "KYC पूरा करें" },
+        { id: "menu_support", title: lang === "EN" ? "Customer Support" : "ग्राहक सहायता" },
       ]
     );
     return `lang === "EN" ? "Aapko kis prakar ki madad chahiye?" : "आपको किस प्रकार की मदद चाहिए?",
       [
- { id: "menu_job", title: lang === "EN" ? "Job Opportunities" : "नौकरी" },
-        { id: "menu_support", title: lang === "EN" ? "Support" : "सहायता" },
-        { id: "menu_kyc", title: lang === "EN" ? "KYC" : "KYC" },
+       { id: "menu_job", title: lang === "EN" ? "Job Opportunities" : "नौकरी" },
+        { id: "menu_kyc", title: lang === "EN" ? "Complete KYC" : "KYC पूरा करें" },
+        { id: "menu_support", title: lang === "EN" ? "Customer Support" : "ग्राहक सहायता" },
       ]`
   }
 
@@ -111,16 +111,16 @@ export class FlowRouter {
           from,
           lang === "EN" ? "❌ Invalid choice. Please select an option:" : "❌ गलत विकल्प। कृपया एक विकल्प चुनें:",
           [
-            { id: "menu_job", title: lang === "EN" ? "Job Opportunities" : "नौकरी" },
-            { id: "menu_support", title: lang === "EN" ? "Support" : "सहायता" },
+            { id: "menu_kyc", title: lang === "EN" ? "Complete KYC" : "KYC पूरा करें" },
+            { id: "menu_support", title: lang === "EN" ? "Customer Support" : "ग्राहक सहायता" },
             { id: "menu_kyc", title: lang === "EN" ? "KYC" : "KYC" },
           ]
         );
         return `"❌ Invalid choice. Please select an option:" : "❌ गलत विकल्प। कृपया एक विकल्प चुनें:",
           [
             { id: "menu_job", title: lang === "EN" ? "Job Opportunities" : "नौकरी" },
-        { id: "menu_support", title: lang === "EN" ? "Support" : "सहायता" },
-        { id: "menu_kyc", title: lang === "EN" ? "KYC" : "KYC" },
+            { id: "menu_kyc", title: lang === "EN" ? "Complete KYC" : "KYC पूरा करें" },
+            { id: "menu_support", title: lang === "EN" ? "Customer Support" : "ग्राहक सहायता" },
           ]`
     }
   }

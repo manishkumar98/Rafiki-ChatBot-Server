@@ -38,62 +38,71 @@ export class JobService {
   }
 
 
-  async sendWhatsAppMessage(
-    to: string,
-    text: string,
-    buttons?: { id: string; title: string }[]
-  ) {
+async sendWhatsAppMessage(
+  to: string,
+  text: string,
+  buttons?: { id: string; title: string }[]
+) {
+  let payload: any;
 
-    let payload: any;
+  // Ensure buttons array exists
+  let finalButtons = buttons ? [...buttons] : [];
 
-    if (buttons && buttons.length > 0) {
-      // interactive button template
-      payload = {
-        messaging_product: "whatsapp",
-        to,
-        type: "interactive",
-        interactive: {
-          type: "button",
-          body: {
-            text,
-          },
-          action: {
-            buttons: buttons.map((btn) => ({
-              type: "reply",
-              reply: {
-                id: btn.id,
-                title: btn.title,
-              },
-            })),
-          },
+  // Condition 1: If no button is present → add reset
+  if (finalButtons.length === 0) {
+    finalButtons.push({ id: "r", title: "Reset" });
+  }
+
+  // Condition 2: If button count < 3 → add reset
+  else if (finalButtons.length < 3) {
+    finalButtons.push({ id: "r", title: "Reset" });
+  }
+
+  if (finalButtons.length > 0) {
+    // interactive button template
+    payload = {
+      messaging_product: "whatsapp",
+      to,
+      type: "interactive",
+      interactive: {
+        type: "button",
+        body: { text },
+        action: {
+          buttons: finalButtons.map((btn) => ({
+            type: "reply",
+            reply: {
+              id: btn.id,
+              title: btn.title,
+            },
+          })),
         },
-      };
+      },
+    };
+  } else {
+    // normal text message
+    payload = {
+      messaging_product: "whatsapp",
+      to,
+      text: { body: text },
+    };
+  }
+
+  try {
+    const response = await axios.post(
+      `https://graph.facebook.com/v19.0/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`,
+      payload,
+      { headers: { Authorization: `Bearer ${process.env.WHATSAPP_TOKEN}` } }
+    );
+    // console.log("✅ WhatsApp API Response:", response.data);
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error("❌ WhatsApp API Error:", error.response?.data || error.message);
     } else {
-      // normal text message
-      payload = {
-        messaging_product: "whatsapp",
-        to,
-        text: { body: text },
-      };
-    }
-
-
-    try {
-      const response = await axios.post(
-        `https://graph.facebook.com/v19.0/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`,
-        payload,
-        { headers: { Authorization: `Bearer ${process.env.WHATSAPP_TOKEN}` } }
-      );
-
-      // console.log("✅ WhatsApp API Response:", response.data);
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error("❌ WhatsApp API Error:", error.response?.data || error.message);
-      } else {
-        console.error("❌ Unexpected Error:", error);
-      }
+      console.error("❌ Unexpected Error:", error);
     }
   }
+}
+
 
 async handleMediaUpload(message: any): Promise<string> {
   const mediaId = message?.image?.id || message?.document?.id;
