@@ -474,18 +474,21 @@ export const commonKeysMapping: Record<string, { EN: string; HI: string }> = {
   },
 };
 export const validationOptions: Record<string, string> = {
-  full_name: `Extract a *human name* (first + last if available). Reject numbers, special characters, or gibberish.`,
+  full_name: `Accept any English-looking human name (single or full). 
+Reject if input is only numbers, random letters, or symbols. `,
 
   age: `Extract the *numeric age* if mentioned in text (e.g., "I am 34 years old" → 34).
     Return valid only if it's a number between 18 and 70. Reject unrealistic ages.`,
 
-  residence_city: `Accept if input resembles an Indian city/town (even with typos/unknown names); reject if only numbers, gibberish, or unrelated words.`,
+residence_city: `Accept if the input is an Indian city/town name, even with typos or variations. 
+If the input is a known city (e.g., "Hassn"), correct it to the canonical spelling (e.g., "Hassan"). 
+Reject only if the input is pure numbers, random gibberish, or unrelated words.`,
 
 
 
   job_preference_city: `Check if the input refers to a *real city in India* where the user wants a job.
    If the user uses abbreviations, typos, or alternate spellings (e.g., "Bangalor","Bengalore", "Banglore", "Hyd", "Hydrabad"), return the canonical city name as in the database (e.g., "Bengaluru", "Hyderabad").
-   Examples: "Mumbai", "Hyderabad". Reject numbers or random words.`,
+   Examples: "Mumbai", "Hyderabad", "Hassan". Reject numbers or random words.`,
 };
 
 export const roleAgeRestrictions: Record<

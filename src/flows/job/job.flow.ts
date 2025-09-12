@@ -230,8 +230,12 @@ export class JobFlow {
             arr.slice(i * size, i * size + size)
           );
         }
+
+        // send the list message first
         await this.jobs.sendWhatsAppMessage(from, listMsg);
+
         const jobChunks = chunkArray(jobs, chunkSize);
+
         for (let i = 0; i < jobChunks.length; i++) {
           const chunk = jobChunks[i];
           const start = i * chunkSize + 1;
@@ -247,13 +251,25 @@ export class JobFlow {
             title: makeButtonTitle(i * chunkSize + j, job),
           }));
 
-          // Add 🚫 Not Interested only to last group
-          if (i === jobChunks.length - 1) {
-            buttons.push({ id: "0", title: "🚫 Not Interested" });
-          }
-
           await this.jobs.sendWhatsAppMessage(from, header, buttons);
+
+          // after the last chunk, send "Not Interested" as a separate message
+          if (i === jobChunks.length - 1) {
+            const notInterestedText =
+              lang === "HI"
+                ? "यदि इनमें से कोई नौकरी उपयुक्त नहीं है, तो नीचे '🚫 Not Interested' दबाएँ।"
+                : "If none of these jobs suit you, tap '🚫 Not Interested' below.";
+
+            // small delay to preserve order
+            await new Promise((r) => setTimeout(r, 250));
+
+            await this.jobs.sendWhatsAppMessage(from, notInterestedText, [
+              { id: "0", title: "🚫 Not Interested" },
+            ]);
+          }
         }
+
+        return listMsg;
       }
 
       return listMsg;
@@ -310,7 +326,7 @@ export class JobFlow {
       await this.jobs.sendWhatsAppMessage(from, msg, [
         { id: "try_again", title: lang === "EN" ? "🔁 Try Other Jobs" : "🔁 अन्य नौकरियाँ देखें" },
         { id: "back_menu", title: lang === "EN" ? "🏠 Back to Menu" : "🏠 मुख्य मेनू" },
-        { id: "exit", title: lang === "EN" ? "🚪 Exit" : "🚪 बाहर निकलें" },
+        { id: "exit", title: lang === "EN" ? "❌ Exit" : "❌ बाहर निकलें" },
       ]);
       return msg;
     }
@@ -344,7 +360,7 @@ export class JobFlow {
 
       [
         { id: "continue", title: lang === "EN" ? "✅ Continue" : "✅ जारी रखें" },
-        { id: "exit", title: lang === "EN" ? "🚪 Exit" : "🚪 बाहर निकलें" },
+        { id: "exit", title: lang === "EN" ? "❌ Exit" : "❌ बाहर निकलें" },
       ]
     );
     return `lang === "EN"
@@ -352,7 +368,7 @@ export class JobFlow {
       : "📑 KYC के लिए आधार, पैन और बैंक प्रूफ अनिवार्य है। क्या आपके पास तैयार है?",
     [
       { id: "continue", title: lang === "EN" ? "✅ Continue" : "✅ जारी रखें" },
-      { id: "exit", title: lang === "EN" ? "🚪 Exit" : "🚪 बाहर निकलें" },
+      { id: "exit", title: lang === "EN" ? "❌ Exit" : "❌ बाहर निकलें" },
     ]`;
   }
 
@@ -425,7 +441,7 @@ export class JobFlow {
     await this.jobs.sendWhatsAppMessage(from, repeat, [
       { id: "try_again", title: lang === "EN" ? "🔁 Try Other Jobs" : "🔁 अन्य नौकरियाँ देखें" },
       { id: "back_menu", title: lang === "EN" ? "🏠 Back to Menu" : "🏠 मुख्य मेनू" },
-      { id: "exit", title: lang === "EN" ? "🚪 Exit" : "🚪 बाहर निकलें" },
+      { id: "exit", title: lang === "EN" ? "❌ Exit" : "❌ बाहर निकलें" },
     ]);
     return repeat;
   }
@@ -504,7 +520,7 @@ export class JobFlow {
         : "🚀 अब हम आपका KYC प्रक्रिया शुरू कर रहे हैं। 📑 इसके लिए आधार, पैन और बैंक प्रूफ अनिवार्य है। क्या आपके पास तैयार है?";
       await this.jobs.sendWhatsAppMessage(from, introMsg, [
         { id: "continue", title: lang === "EN" ? "✅ Continue" : "✅ जारी रखें" },
-        { id: "exit", title: lang === "EN" ? "🚪 Exit" : "🚪 बाहर निकलें" },
+        { id: "exit", title: lang === "EN" ? "❌ Exit" : "❌ बाहर निकलें" },
       ]);
       return introMsg;
     }
