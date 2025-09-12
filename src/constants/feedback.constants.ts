@@ -76,7 +76,7 @@ export const FEEDBACK_SETS: Record<"NEST" | "FOOD" | "JOB" | "OVERALL", Feedback
     {
       key: "curryRating",
       type: "scale",
-      when: { if: "curryUser", equals: true },
+      when: { if: "foodIntro",equals: "continue"},
       prompt: {
         EN: "⭐ Please rate your food experience from *0 to 10*",
         HI: "⭐ कृपया अपने खाने के अनुभव को *0 से 10* तक रेट करें",
@@ -85,7 +85,7 @@ export const FEEDBACK_SETS: Record<"NEST" | "FOOD" | "JOB" | "OVERALL", Feedback
     {
       key: "curryBest",
       type: "text",
-      when: { if: "curryUser", equals: true },
+      when: { if: "foodIntro",equals: "continue" },
       prompt: {
         EN: "✨ What did you like the most about the food?",
         HI: "✨ खाने में आपको सबसे अच्छी चीज़ क्या लगी?",
@@ -94,7 +94,7 @@ export const FEEDBACK_SETS: Record<"NEST" | "FOOD" | "JOB" | "OVERALL", Feedback
     {
       key: "curryIssues",
       type: "text",
-      when: { if: "curryUser", equals: true },
+      when: { if: "foodIntro",equals: "continue" },
       prompt: {
         EN: "⚠️ What did you not like / what can we improve?",
         HI: "⚠️ खाने में आपको क्या पसंद नहीं आया या कहाँ सुधार हो सकता है?",
