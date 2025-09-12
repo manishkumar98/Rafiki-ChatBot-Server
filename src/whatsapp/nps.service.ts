@@ -17,7 +17,6 @@ export class NpsService {
     async triggerBatch() {
         const numbers = await this.sheets.readNumbers();
         console.log(`📋 Found ${numbers.length} valid numbers to process`);
-
         for (const { phone, type } of numbers) {
             try {
                 this.stateService.reset(phone);
@@ -27,11 +26,11 @@ export class NpsService {
                     feedback_type: type || "ALL",
                     nps_feedback_answers: {},
                 });
-
+                   
                 const state = this.stateService.get(phone);
                 await this.flowRouter.route("FEEDBACK", phone, "__INIT__", state);
 
-                console.log(`✅ Successfully triggered flow for ${phone} (${type})`);
+                console.log(`✅ Successfully triggered flow for ${phone} (${type}), ${JSON.stringify(state)}`);
             } catch (err) {
                 console.error(`❌ Failed for ${phone}:`, err.message || err);
             }

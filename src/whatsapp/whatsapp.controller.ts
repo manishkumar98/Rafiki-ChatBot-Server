@@ -2,6 +2,7 @@ import { Controller, Get, Post, Query, Req, Res } from "@nestjs/common";
 import { ConversationStateService } from "../session/conversation-state.service";
 import { JobService } from "./job.service";
 import { FlowRouter } from "../flows/flow-router.service";
+import { NpsService } from "./nps.service";
 
 
 @Controller("webhook")
@@ -9,6 +10,7 @@ export class WhatsappController {
   constructor(
     private stateService: ConversationStateService,
     private jobs: JobService,
+    private nps: NpsService,
     private flowRouter: FlowRouter,
   ) { }
 
@@ -72,7 +74,10 @@ export class WhatsappController {
     return this.flowRouter.route(state.currentFlow ?? "WELCOME", from, text, state)
   }
 
-
+@Post("trigger-nps")
+async triggerNps() {
+  return this.nps.triggerBatch();
+}
 
   @Get()
   async verifyWebhook(

@@ -11,6 +11,7 @@ import { FlowRouter } from "../flows/flow-router.service";
 import { JobFlow } from "../flows/job/job.flow";
 import { FeedbackFlow } from "../flows/feedback/feedback.flow";
 import { SupportFlow } from "../flows/support/support.flow";
+import { NpsService } from "./nps.service";
 
 @Module({
   imports: [HttpModule],
@@ -25,7 +26,8 @@ import { SupportFlow } from "../flows/support/support.flow";
     JobService,
     JobFlow,
     SupportFlow,
-    FeedbackFlow
+    FeedbackFlow,
+    NpsService
   ],
   exports: [WhatsappService],
 })
