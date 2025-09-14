@@ -166,38 +166,51 @@ export class SheetsService {
   }
 
   async appendFeedbackRow(answers: Record<string, any>, phone: string) {
-  console.log
-  const spreadsheetId = process.env.SPREADSHEET_ID;
-  const sheetName = "Feedback";
+    const spreadsheetId = process.env.SPREADSHEET_ID;
+    const sheetName = "Feedback";
 
-  const headersRes = await this.sheets.spreadsheets.values.get({
-    spreadsheetId,
-    range: `${sheetName}!1:1`,
-  });
+    // get existing headers
+    const headersRes = await this.sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: `${sheetName}!1:1`,
+    });
 
-  let headers: string[] = headersRes.data.values?.[0] || [];
+    let headers: string[] = headersRes.data.values?.[0] || [];
 
-  // enforce fixed headers
-  const fixedHeaders = ["phone", "timestamp"];
-  const answerKeys = Object.keys(answers || {});
-  headers = [...fixedHeaders, ...headers.filter(h => !fixedHeaders.includes(h)), ...answerKeys];
+    const fixedHeaders = ["phone", "timestamp"];
+    const answerKeys = Object.keys(answers || {});
 
-  const valuesRow = headers.map((key) => {
-    if (key === "phone") return phone;
-    if (key === "timestamp") return new Date().toLocaleString();
-    if (answers[key] !== undefined) {
-      return typeof answers[key] === "object" ? JSON.stringify(answers[key]) : answers[key];
-    }
-    return "";
-  });
+    // merge fixed + existing + new
+    let newHeaders = [
+      ...fixedHeaders,
+      ...headers.filter((h) => !fixedHeaders.includes(h)),
+      ...answerKeys,
+    ];
 
-  // ensure headers
-  await this.sheets.spreadsheets.values.update({
-    spreadsheetId,
-    range: `${sheetName}!A1`,
-    valueInputOption: "USER_ENTERED",
-    requestBody: { values: [headers] },
-  });
+    // de-duplicate
+    newHeaders = newHeaders.filter((h, idx) => newHeaders.indexOf(h) === idx);
+
+    // build row
+    const valuesRow = newHeaders.map((key) => {
+      if (key === "phone") return phone;
+      if (key === "timestamp") return new Date().toLocaleString();
+      if (answers[key] !== undefined) {
+        return typeof answers[key] === "object"
+          ? JSON.stringify(answers[key])
+          : answers[key];
+      }
+      return "";
+    });
+
+    // update headers only if needed
+    if (JSON.stringify(newHeaders) !== JSON.stringify(headers)) {
+      await this.sheets.spreadsheets.values.update({
+        spreadsheetId,
+        range: `${sheetName}!A1`,
+        valueInputOption: "USER_ENTERED",
+        requestBody: { values: [newHeaders] },
+      });
+  }
 
   // append row
   await this.sheets.spreadsheets.values.append({
@@ -207,6 +220,7 @@ export class SheetsService {
     requestBody: { values: [valuesRow] },
   });
 }
+
 
 async appendKycRow(answers: Record<string, any>, phone: string) {
   const spreadsheetId = process.env.SPREADSHEET_ID;

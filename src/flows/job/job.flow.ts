@@ -626,8 +626,9 @@ export class JobFlow {
       this.stateService.reset(from);
 
       const thanks = lang === "EN"
-        ? "🎉 Thank you! Your Aadhaar, PAN, and Bank Proof have been submitted successfully."
-        : "🎉 धन्यवाद! आपका आधार, पैन और बैंक प्रूफ सफलतापूर्वक जमा हो गया है।";
+        ? "🎉 Thank you! Your Aadhaar, PAN, and Bank Proof have been submitted successfully. We will get back to you with more details soon. To restart the process anytime, just type *hi*."
+        : "🎉 धन्यवाद! आपका आधार, पैन और बैंक प्रूफ सफलतापूर्वक जमा हो गया है। हम आपको जल्द ही अधिक जानकारी के साथ संपर्क करेंगे। प्रक्रिया को फिर से शुरू करने के लिए, बस *hi* टाइप करें।";
+
 
       await this.jobs.sendWhatsAppMessage(from, thanks);
       return thanks;
