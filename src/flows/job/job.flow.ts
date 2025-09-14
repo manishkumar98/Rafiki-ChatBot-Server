@@ -375,7 +375,6 @@ export class JobFlow {
   // ---------- JOB SELECTION OPTIONS (rejection path) ----------
   private async handleJobSelectionOptions(from: string, text: string, lang: Lang, state: any) {
     if (text === "try_again") {
-      // rerun search for the same city and present roles again
       const matched = await this.jobs.findJobsByCity(state.answers.job_preference_city);
       if (!matched || matched.length === 0) {
         const noJobs: Record<Lang, string> = {
@@ -402,6 +401,26 @@ export class JobFlow {
 
       const msg = roleMessages[lang](categories);
       await this.jobs.sendWhatsAppMessage(from, msg);
+
+      // 🔘 Send buttons (same as in handleCommon)
+      const maxButtonsPerMsg = 3;
+      for (let i = 0; i < categories.length; i += maxButtonsPerMsg) {
+        const chunk = categories.slice(i, i + maxButtonsPerMsg);
+
+        const buttons = chunk.map((role, index) => {
+          let title = `${i + index + 1}. ${role}`;
+          if (title.length > 20) title = title.slice(0, 17) + '...';
+          return { id: `${i + index + 1}`, title };
+        });
+
+        const groupText =
+          lang === "HI"
+            ? `✨ नौकरी विकल्प (${i + 1}–${i + chunk.length})`
+            : `✨ Job Options (${i + 1}–${i + chunk.length})`;
+
+        await this.jobs.sendWhatsAppMessage(from, groupText, buttons);
+      }
+
       return msg;
     }
 
