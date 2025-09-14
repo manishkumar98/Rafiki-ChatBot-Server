@@ -212,6 +212,7 @@ async appendKycRow(answers: Record<string, any>, phone: string) {
   const spreadsheetId = process.env.SPREADSHEET_ID;
   const sheetName = "KYC"; // 👈 Create this sheet manually in Google Sheets
 
+  // get existing headers from sheet
   const headersRes = await this.sheets.spreadsheets.values.get({
     spreadsheetId,
     range: `${sheetName}!1:1`,
@@ -222,24 +223,38 @@ async appendKycRow(answers: Record<string, any>, phone: string) {
   // enforce fixed headers
   const fixedHeaders = ["phone", "timestamp"];
   const answerKeys = Object.keys(answers || {});
-  headers = [...fixedHeaders, ...headers.filter(h => !fixedHeaders.includes(h)), ...answerKeys];
 
-  const valuesRow = headers.map((key) => {
+  // merge fixed, existing, and new keys
+  let newHeaders = [
+    ...fixedHeaders,
+    ...headers.filter((h) => !fixedHeaders.includes(h)),
+    ...answerKeys,
+  ];
+
+  // de-duplicate while preserving order
+  newHeaders = newHeaders.filter((h, idx) => newHeaders.indexOf(h) === idx);
+
+  // build row according to final header order
+  const valuesRow = newHeaders.map((key) => {
     if (key === "phone") return phone;
     if (key === "timestamp") return new Date().toLocaleString();
     if (answers[key] !== undefined) {
-      return typeof answers[key] === "object" ? JSON.stringify(answers[key]) : answers[key];
+      return typeof answers[key] === "object"
+        ? JSON.stringify(answers[key])
+        : answers[key];
     }
     return "";
   });
 
-  // ensure headers
-  await this.sheets.spreadsheets.values.update({
-    spreadsheetId,
-    range: `${sheetName}!A1`,
-    valueInputOption: "USER_ENTERED",
-    requestBody: { values: [headers] },
-  });
+  // update headers only if changed
+  if (JSON.stringify(newHeaders) !== JSON.stringify(headers)) {
+    await this.sheets.spreadsheets.values.update({
+      spreadsheetId,
+      range: `${sheetName}!A1`,
+      valueInputOption: "USER_ENTERED",
+      requestBody: { values: [newHeaders] },
+    });
+  }
 
   // append row
   await this.sheets.spreadsheets.values.append({
@@ -249,6 +264,7 @@ async appendKycRow(answers: Record<string, any>, phone: string) {
     requestBody: { values: [valuesRow] },
   });
 }
+
 
 async readNumbers(): Promise<{ phone: string; type: string }[]> {
   const spreadsheetId = process.env.SPREADSHEET_ID;
