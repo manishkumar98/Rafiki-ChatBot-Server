@@ -65,7 +65,7 @@ export class WhatsappController {
         [
           { id: "lang_en", title: "English" },
           { id: "lang_hi", title: "हिंदी" },
-        ]
+        ], true
       );
 
       return `Hi! I am Rafiki – your friend. Please choose your language before we begin:
