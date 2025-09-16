@@ -74,7 +74,7 @@ export const roleMessages: Record<"EN" | "HI", (roles: string[]) => string> = {
 
     return `🌟 *Exciting Job Categories Await You!* 🌟\n\n${roles
       .map((cat, i) => `${emojiNums[i] || `${i + 1}`}  ${roleIcons[cat] || "✨"} *${cat}*`) 
-      .join("\n")}\n\n👉 Reply with the job *number* to apply or know more! 🚀`;
+      .join("\n")}\n\n👉  Click on a job to apply or know more! 🚀`;
   },
 
   HI: (roles) => {
@@ -111,7 +111,7 @@ export const roleMessages: Record<"EN" | "HI", (roles: string[]) => string> = {
 
     return `🌟 *उपलब्ध नौकरी की श्रेणियाँ* 🌟\n\n${roles
       .map((cat, i) => `${emojiNums[i] || `${i + 1}`}  ${roleIcons[cat] || "✨"} *${cat}*`) // 👈 added 2 spaces after emoji
-      .join("\n")}\n\n👉 कृपया नौकरी का *नंबर* बताइए जिसमें आप रुचि रखते हैं। 🚀`;
+      .join("\n")}\n\n👉 जिस नौकरी में रुचि है उस पर क्लिक करें और अधिक जानें! 🚀`;
   },
 };
 

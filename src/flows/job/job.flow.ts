@@ -630,7 +630,7 @@ export class JobFlow {
         : "🎉 धन्यवाद! आपका आधार, पैन और बैंक प्रूफ सफलतापूर्वक जमा हो गया है। हम आपको जल्द ही अधिक जानकारी के साथ संपर्क करेंगे। प्रक्रिया को फिर से शुरू करने के लिए, बस *hi* टाइप करें।";
 
 
-      await this.jobs.sendWhatsAppMessage(from, thanks);
+      await this.jobs.sendWhatsAppMessage(from, thanks, undefined, true);
       return thanks;
     }
   }

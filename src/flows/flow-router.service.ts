@@ -132,14 +132,14 @@ export class FlowRouter {
 
     await this.jobs.sendWhatsAppMessage(
       from,
-      "👋 Hi! Main hoon Rafiki – aapka dost.\n\nIsse pehle ke hum shuru karein, kripya apni language choose karein:",
+      "👋 Hi! I am Rafiki – your friend. Please choose your language before we begin:",
       [
         { id: "lang_en", title: "English" },
         { id: "lang_hi", title: "हिंदी" },
       ]
     );
 
-    return ` "👋 Hi! Main hoon Rafiki – aapka dost.\n\nIsse pehle ke hum shuru karein, kripya apni language choose karein:",
+    return ` "👋 Hi! I am Rafiki – your friend. Please choose your language before we begin:",
     [
       { id: "lang_en", title: "English" },
       { id: "lang_hi", title: "हिंदी" },

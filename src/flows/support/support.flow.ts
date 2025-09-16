@@ -44,10 +44,10 @@ export class SupportFlow implements FlowHandler {
       }
       const reply =
         lang === "EN"
-          ? "✅ Thanks! Our representative will contact you shortly."
-          : "✅ धन्यवाद! हमारा प्रतिनिधि आपसे शीघ्र संपर्क करेगा।";
+          ? "🙏 Thank you! Your feedback has been recorded. Have a wonderful day! ✨\n\n👉 Type *hi* anytime to restart."
+          : "🙏 धन्यवाद! आपका फ़ीडबैक रिकॉर्ड कर लिया गया है, आपका दिन शुभ हो! ✨\n\n👉 कभी भी पुनः प्रारंभ करने के लिए *hi* लिखें।";
 
-      await this.jobs.sendWhatsAppMessage(from, reply);
+      await this.jobs.sendWhatsAppMessage(from, reply,undefined,true);
 
       // reset after capturing query
       this.stateService.reset(from);

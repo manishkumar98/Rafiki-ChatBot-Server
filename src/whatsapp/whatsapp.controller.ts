@@ -17,7 +17,7 @@ export class WhatsappController {
 
   @Post()
   async webhookV1(@Req() req: any) {
-      if (req?.body?.nps) {
+    if (req?.body?.nps) {
       const from = String(req.body.nps.from || "").trim();
       const feedbackType = req.body.nps.type;
       if (!from || !feedbackType) return "NPS: 'from' missing";
@@ -43,41 +43,46 @@ export class WhatsappController {
       } else if (interactiveType === "list_reply") {
         text = message.interactive?.list_reply?.id;
       }
-    }else if (["image", "document", "video", "audio"].includes(message?.type)) {
-      text = message; 
+    } else if (["image", "document", "video", "audio"].includes(message?.type)) {
+      text = message;
     }
-    
+
     if (!from || !text) return "Text or from is missing";
     console.log(`check type for text`, typeof text, text);
     if (typeof text === "string" && ["r", "hi", "hello", "start"].includes(text.toLowerCase())) {
+      const state = this.stateService.get(from);
+
+      // Special case: restart Feedback flow
+      if (text.toLowerCase() === "r" && state.currentFlow === "FEEDBACK") {
+        this.stateService.update(from, { currentFlow: "FEEDBACK", step: 0 });
+        return this.flowRouter.route("FEEDBACK", from, "__INIT__", state);
+      }
       this.stateService.reset(from);
       this.stateService.update(from, { currentFlow: "LANGUAGE", step: 0 });
 
       await this.jobs.sendWhatsAppMessage(from,
-        "👋 Hi! Main hoon Rafiki – aapka dost.\n\nIsse pehle ke hum shuru karein, kripya apni language choose karein:",
+        "👋 Hi! I am Rafiki – your friend. Please choose your language before we begin:",
         [
           { id: "lang_en", title: "English" },
           { id: "lang_hi", title: "हिंदी" },
         ]
       );
 
-      return   `Hi! 👋 Main hoon Rafiki 🙏 
-      Aapke liye job dhoondhne mein madad karunga.
-      Chaliye start karte hain!
+      return `Hi! I am Rafiki – your friend. Please choose your language before we begin:
       Choose language:
       1. English (reply LANG_EN)
       2. Hindi (reply LANG_HI)`
     }
 
     const state = this.stateService.get(from);
-    console.log("Current state:", JSON.stringify(state.answers),state.currentFlow, text);
+    console.log("Current state:", JSON.stringify(state.answers), state.currentFlow, text);
     return this.flowRouter.route(state.currentFlow ?? "WELCOME", from, text, state)
   }
 
-@Post("trigger-nps")
-async triggerNps() {
-  return this.nps.triggerBatch();
-}
+  @Post("trigger-nps")
+  async triggerNps() {
+    return this.nps.triggerBatch();
+  }
 
   @Get()
   async verifyWebhook(

@@ -6,7 +6,7 @@ export interface FeedbackQ {
   type: FeedbackQType;
   prompt: Record<Lang, string>;
   when?: { if: string; equals: any };
-  options?: { id: string; title: string }[]; // 👈 for buttons
+  options?:  Record<Lang, { id: string; title: string }[]>;
 }
 
 export const FEEDBACK_SETS: Record<"NEST" | "FOOD" | "JOB" | "OVERALL", FeedbackQ[]> = {
@@ -18,10 +18,16 @@ export const FEEDBACK_SETS: Record<"NEST" | "FOOD" | "JOB" | "OVERALL", Feedback
        EN: "👋 Hi! We’d love your feedback on your *Nest* stay. If you didn’t stay, just press No to exit.  If yes, press Yes to continue for feedback 🙂",
        HI: "👋 नमस्ते! हमें आपके *Nest* ठहराव पर आपका फ़ीडबैक चाहिए। अगर आपने ठहराव नहीं किया, तो बाहर निकलने के लिए 'नहीं' दबाएँ 🙂। अगर हाँ, तो 'हाँ' दबाएँ ताकि हम आपका फ़ीडबैक ले सकें",
       },
-      options: [
-        { id: "continue", title: "✅ हाँ" },
-        { id: "exit", title: "❌ नहीं" },
-      ],
+   options: {
+        EN: [
+          { id: "continue", title: "✅ Yes" },
+          { id: "exit", title: "❌ No" },
+        ],
+        HI: [
+          { id: "continue", title: "✅ हाँ" },
+          { id: "exit", title: "❌ नहीं" },
+        ],
+      },
     },
     {
       key: "nestRating",
@@ -54,10 +60,16 @@ export const FEEDBACK_SETS: Record<"NEST" | "FOOD" | "JOB" | "OVERALL", Feedback
         EN: "🤝 Would you recommend Nest to your family or friends?",
         HI: "🤝 क्या आप *Nest* को अपने दोस्तों या परिवार को सुझाएँगे?",
       },
-      options: [
-        { id: "yes", title: "👍 हाँ" },
-        { id: "no", title: "👎 नहीं" },
-      ],
+     options: {
+        EN: [
+          { id: "continue", title: "✅ Yes" },
+          { id: "exit", title: "❌ No" },
+        ],
+        HI: [
+          { id: "continue", title: "✅ हाँ" },
+          { id: "exit", title: "❌ नहीं" },
+        ],
+      },
     },
   ],
   FOOD: [
@@ -68,10 +80,16 @@ export const FEEDBACK_SETS: Record<"NEST" | "FOOD" | "JOB" | "OVERALL", Feedback
         EN: "👋 Hi! Did you use our *Curry food service*? If not, press No. If yes, press Yes to continue for feedback 🍛",
         HI: "👋 हाय! क्या आपने *Nest* में *Curry सेवा* का उपयोग किया था? अगर नहीं, तो 'नहीं' दबाएँ। अगर हाँ, तो 'हाँ' दबाएँ ताकि हम आपका फ़ीडबैक ले सकें 🍛",
       },
-      options: [
-        { id: "continue", title: "✅ हाँ" },
-        { id: "exit", title: "❌ नहीं" },
-      ],
+      options: {
+        EN: [
+          { id: "continue", title: "✅ Yes" },
+          { id: "exit", title: "❌ No" },
+        ],
+        HI: [
+          { id: "continue", title: "✅ हाँ" },
+          { id: "exit", title: "❌ नहीं" },
+        ],
+      },
     },
     {
       key: "curryRating",
@@ -109,10 +127,16 @@ export const FEEDBACK_SETS: Record<"NEST" | "FOOD" | "JOB" | "OVERALL", Feedback
         EN: "👋 Hi! Since you got job support from us, we’d like to know your experience 👷",
         HI: "👋 नमस्ते! आपको हमारी ओर से नौकरी मिली थी, उसका फ़ीडबैक चाहिए 👷",
       },
-      options: [
-        { id: "continue", title: "✅ हाँ" },
-        { id: "exit", title: "❌ नहीं" },
-      ],
+      options: {
+        EN: [
+          { id: "continue", title: "✅ Yes" },
+          { id: "exit", title: "❌ No" },
+        ],
+        HI: [
+          { id: "continue", title: "✅ हाँ" },
+          { id: "exit", title: "❌ नहीं" },
+        ],
+      },
     },
     {
       key: "gotJob",
@@ -121,10 +145,16 @@ export const FEEDBACK_SETS: Record<"NEST" | "FOOD" | "JOB" | "OVERALL", Feedback
         EN: "💼 Did you get a job through us?",
         HI: "💼 क्या आपको हमारी ओर से नौकरी मिली थी?",
       },
-      options: [
-        { id: "yes", title: "👍 हाँ" },
-        { id: "no", title: "👎 नहीं" },
-      ],
+      options: {
+        EN: [
+          { id: "continue", title: "✅ Yes" },
+          { id: "exit", title: "❌ No" },
+        ],
+        HI: [
+          { id: "continue", title: "✅ हाँ" },
+          { id: "exit", title: "❌ नहीं" },
+        ],
+      },
     },
     {
       key: "jobRating",
@@ -140,8 +170,8 @@ export const FEEDBACK_SETS: Record<"NEST" | "FOOD" | "JOB" | "OVERALL", Feedback
       type: "text",
       when: { if: "gotJob", equals: true },
       prompt: {
-        EN: "✨ What do you like the most in your job?",
-        HI: "✨ नौकरी में आपको सबसे अच्छा क्या लग रहा है?",
+        EN: "✨ In your current job, what do you like?",
+        HI: "✨ अपनी अभी की नौकरी में आपको सबसे अच्छा क्या लगता है?",
       },
     },
     {
@@ -162,10 +192,16 @@ export const FEEDBACK_SETS: Record<"NEST" | "FOOD" | "JOB" | "OVERALL", Feedback
         EN: "🌐 Hi! We’d love your feedback on our *overall services*.",
         HI: "🌐 नमस्ते! हमें अपनी *संपूर्ण सेवाओं* पर आपका फ़ीडबैक चाहिए 🙂",
       },
-      options: [
-        { id: "continue", title: "✅ हाँ" },
-        { id: "exit", title: "❌ नहीं" },
-      ],
+      options: {
+        EN: [
+          { id: "continue", title: "✅ Yes" },
+          { id: "exit", title: "❌ No" },
+        ],
+        HI: [
+          { id: "continue", title: "✅ हाँ" },
+          { id: "exit", title: "❌ नहीं" },
+        ],
+      },
     },
     {
       key: "overallRating",

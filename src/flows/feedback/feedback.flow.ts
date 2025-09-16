@@ -62,7 +62,7 @@ export class FeedbackFlow {
                 const allQuestions = getQuestionsForType(type);
                 const introQ = allQuestions[0];
                 if (introQ.options) {
-                    await this.jobs.sendWhatsAppMessage(from, introQ.prompt[lang], introQ.options);
+                    await this.jobs.sendWhatsAppMessage(from, introQ.prompt[lang], introQ.options[lang]);
                 } else {
                     await this.jobs.sendWhatsAppMessage(from, introQ.prompt[lang]);
                 }
@@ -82,13 +82,13 @@ export class FeedbackFlow {
         if (!state.language) {
             await this.jobs.sendWhatsAppMessage(
                 from,
-                "👋 Namaste! Aapka feedback humare liye important hai — humein aapka experience 🏡🍴💼 jaanna hai 🙂.  🙏 Apni language choose karein feedback dene ke liye / कृपया अपनी भाषा चुनें:",
+                "👋 Hello! Your feedback is important to us — we’d love to know about your experience 🏡🍴💼 🙂. 🙏 Please choose your language to give feedback:",
                 [
                     { id: "lang_en", title: "English" },
                     { id: "lang_hi", title: "हिंदी" },
                 ]
             );
-            this.stateService.update(from, { currentFlow: "FEEDBACK", step: -1 }); // step -1 = waiting for language
+            this.stateService.update(from, { currentFlow: "FEEDBACK", step: -1 });
             return "Awaiting language selection";
         }
 
@@ -102,7 +102,7 @@ export class FeedbackFlow {
             this.stateService.update(from, { step: startIdx });
             const introQ = allQuestions[startIdx];
             if (introQ.options) {
-                await this.jobs.sendWhatsAppMessage(from, introQ.prompt[lang], introQ.options);
+                await this.jobs.sendWhatsAppMessage(from, introQ.prompt[lang],introQ.options[lang]);
             } else {
                 await this.jobs.sendWhatsAppMessage(from, introQ.prompt[lang]);
             }
@@ -117,8 +117,8 @@ export class FeedbackFlow {
             await this.jobs.sendWhatsAppMessage(
                 from,
                 lang === "EN"
-                    ? "🙏 Thank you! Your feedback has been recorded. Have a wonderful day! ✨"
-                    : "🙏 Dhanyawad! Aapka feedback record kar liya gaya hai.\nAapka din shubh ho! ✨"
+                    ? "🙏 Thank you! Your feedback has been recorded. Have a wonderful day! ✨\n\n👉 Type *hi* anytime to restart."
+                    : "🙏 धन्यवाद! आपका फ़ीडबैक रिकॉर्ड कर लिया गया है, आपका दिन शुभ हो! ✨\n\n👉 कभी भी पुनः प्रारंभ करने के लिए *hi* लिखें।",undefined,true
             );
             this.stateService.reset(from);
             return "Feedback done (no pending question).";
@@ -128,7 +128,7 @@ export class FeedbackFlow {
 
         // Exit logic for intro
         if (currentQ.key.endsWith("Intro")) {
-            if (text.toLowerCase() === "exit" || text.toLowerCase() === "🚪 exit") {
+            if (text.toLowerCase() === "exit" || text.toLowerCase() === "❌  exit") {
                 try {
                     await this.sheets.appendFeedbackRow(state.nps_feedback_answers || {}, from);
                 } catch (e) {
@@ -136,7 +136,7 @@ export class FeedbackFlow {
                 }
                 await this.jobs.sendWhatsAppMessage(
                     from,
-                    lang === "EN" ? "🚪 Feedback cancelled. Have a nice day!" : "🚪 Feedback cancel kar diya gaya. Aapka din shubh ho!"
+                    lang === "EN" ? "❌  Feedback cancelled. Have a nice day!" : "❌ फ़ीडबैक रद्द कर दिया गया, आपका दिन शुभ हो!", undefined,true
                 );
                 this.stateService.reset(from);
                 return "Feedback exited.";
@@ -152,7 +152,7 @@ export class FeedbackFlow {
             this.stateService.update(from, { nps_feedback_answers: answers, step: next });
             const nextQ = allQuestions[next];
             if (nextQ.options) {
-                await this.jobs.sendWhatsAppMessage(from, nextQ.prompt[lang], nextQ.options);
+                await this.jobs.sendWhatsAppMessage(from, nextQ.prompt[lang], nextQ.options[lang]);
             } else {
                 await this.jobs.sendWhatsAppMessage(from, nextQ.prompt[lang]);
             }
@@ -168,8 +168,9 @@ export class FeedbackFlow {
         await this.jobs.sendWhatsAppMessage(
             from,
             lang === "EN"
-                ? "🙏 Thank you! Your feedback has been recorded. Have a wonderful day! ✨"
-                : "🙏 Dhanyawad! Aapka feedback record kar liya gaya hai.\nAapka din shubh ho! ✨"
+            ? "🙏 Thank you! Your feedback has been recorded. Have a wonderful day! ✨\n\n👉 Type *hi* anytime to restart."
+            : "🙏 धन्यवाद! आपका फ़ीडबैक रिकॉर्ड कर लिया गया है, आपका दिन शुभ हो! ✨\n\n👉 कभी भी पुनः प्रारंभ करने के लिए *hi* लिखें।", undefined,true
+
         );
         this.stateService.reset(from);
         return "Feedback completed";

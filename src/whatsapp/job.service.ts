@@ -2,12 +2,14 @@
 import { Injectable, Inject } from "@nestjs/common";
 import { SupabaseClient } from "@supabase/supabase-js";
 import axios from "axios";
+import { ConversationStateService } from "../session/conversation-state.service";
 
 @Injectable()
 export class JobService {
   constructor(
     @Inject("SUPABASE_CLIENT")
-    private readonly supabase: SupabaseClient
+    private readonly supabase: SupabaseClient,
+    private readonly stateService: ConversationStateService 
   ) { }
 
   async findJobs(city: string, state: string) {
@@ -41,21 +43,25 @@ export class JobService {
 async sendWhatsAppMessage(
   to: string,
   text: string,
-  buttons?: { id: string; title: string }[]
+  buttons?: { id: string; title: string }[],
+  noReset?: boolean,
 ) {
   let payload: any;
-
+    const state = this.stateService.get(to);
+    let  lang = (state?.language as "EN" | "HI") || "EN";
+    const resetLabel = lang === "HI" ? "🔄 रीसेट" : "Reset";
   // Ensure buttons array exists
   let finalButtons = buttons ? [...buttons] : [];
 
-  // Condition 1: If no button is present → add reset
-  if (finalButtons.length === 0) {
-    finalButtons.push({ id: "r", title: "Reset" });
-  }
+   if (!noReset) {
+    if (finalButtons.length === 0) {
+      finalButtons.push({ id: "r", title:resetLabel });
+    }
 
-  // Condition 2: If button count < 3 → add reset
-  else if (finalButtons.length < 3) {
-    finalButtons.push({ id: "r", title: "Reset" });
+    // Condition 2: If button count < 3 → add reset
+    else if (finalButtons.length < 3) {
+      finalButtons.push({ id: "r", title: resetLabel });
+    }
   }
 
   if (finalButtons.length > 0) {
