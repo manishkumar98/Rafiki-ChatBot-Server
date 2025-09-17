@@ -53,14 +53,14 @@ export class FlowRouter {
 
     await this.jobs.sendWhatsAppMessage(
       from,
-      lang === "EN" ? "Aapko kis prakar ki madad chahiye?💼🚀" : "आपको किस प्रकार की मदद चाहिए?",
+      lang === "EN" ? "What kind of help do you need?💼🚀" : "आपको किस प्रकार की मदद चाहिए?",
       [
         { id: "menu_job", title: lang === "EN" ? "Job Opportunities" : "नौकरी" },
         { id: "menu_kyc", title: lang === "EN" ? "Complete KYC" : "KYC पूरा करें" },
         { id: "menu_support", title: lang === "EN" ? "Customer Support" : "ग्राहक सहायता" },
       ]
     );
-    return `lang === "EN" ? "Aapko kis prakar ki madad chahiye?" : "आपको किस प्रकार की मदद चाहिए?",
+    return `lang === "EN" ? "What kind of help do you need??" : "आपको किस प्रकार की मदद चाहिए?",
       [
        { id: "menu_job", title: lang === "EN" ? "Job Opportunities" : "नौकरी" },
         { id: "menu_kyc", title: lang === "EN" ? "Complete KYC" : "KYC पूरा करें" },
