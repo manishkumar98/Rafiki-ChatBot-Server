@@ -6,7 +6,7 @@ export interface FeedbackQ {
   type: FeedbackQType;
   prompt: Record<Lang, string>;
   when?: { if: string; equals: any };
-  options?:  Record<Lang, { id: string; title: string }[]>;
+  options?: Record<Lang, { id: string; title: string }[]>;
 }
 
 export const FEEDBACK_SETS: Record<"NEST" | "FOOD" | "JOB" | "OVERALL", FeedbackQ[]> = {
@@ -15,10 +15,10 @@ export const FEEDBACK_SETS: Record<"NEST" | "FOOD" | "JOB" | "OVERALL", Feedback
       key: "nestIntro",
       type: "text",
       prompt: {
-       EN: "👋 Hi! We’d love your feedback on your *Nest* stay. If you didn’t stay, just press No to exit.  If yes, press Yes to continue for feedback 🙂",
-       HI: "👋 नमस्ते! हमें आपके *Nest* ठहराव पर आपका फ़ीडबैक चाहिए। अगर आपने ठहराव नहीं किया, तो बाहर निकलने के लिए 'नहीं' दबाएँ 🙂। अगर हाँ, तो 'हाँ' दबाएँ ताकि हम आपका फ़ीडबैक ले सकें",
+        EN: "👋 Hi! We’d love your feedback on your *Nest* stay. If you didn’t stay, just press No to exit.  If yes, press Yes to continue for feedback 🙂",
+        HI: "👋 नमस्ते! हमें आपके *Nest* ठहराव पर आपका फ़ीडबैक चाहिए। अगर आपने ठहराव नहीं किया, तो बाहर निकलने के लिए 'नहीं' दबाएँ 🙂। अगर हाँ, तो 'हाँ' दबाएँ ताकि हम आपका फ़ीडबैक ले सकें",
       },
-   options: {
+      options: {
         EN: [
           { id: "continue", title: "✅ Yes" },
           { id: "exit", title: "❌ No" },
@@ -60,7 +60,7 @@ export const FEEDBACK_SETS: Record<"NEST" | "FOOD" | "JOB" | "OVERALL", Feedback
         EN: "🤝 Would you recommend Nest to your family or friends?",
         HI: "🤝 क्या आप *Nest* को अपने दोस्तों या परिवार को सुझाएँगे?",
       },
-     options: {
+      options: {
         EN: [
           { id: "continue", title: "✅ Yes" },
           { id: "exit", title: "❌ No" },
@@ -94,7 +94,7 @@ export const FEEDBACK_SETS: Record<"NEST" | "FOOD" | "JOB" | "OVERALL", Feedback
     {
       key: "curryRating",
       type: "scale",
-      when: { if: "foodIntro",equals: "continue"},
+      when: { if: "foodIntro", equals: "continue" },
       prompt: {
         EN: "⭐ Please rate your food experience from *0 to 10*",
         HI: "⭐ कृपया अपने खाने के अनुभव को *0 से 10* तक रेट करें",
@@ -103,7 +103,7 @@ export const FEEDBACK_SETS: Record<"NEST" | "FOOD" | "JOB" | "OVERALL", Feedback
     {
       key: "curryBest",
       type: "text",
-      when: { if: "foodIntro",equals: "continue" },
+      when: { if: "foodIntro", equals: "continue" },
       prompt: {
         EN: "✨ What did you like the most about the food?",
         HI: "✨ खाने में आपको सबसे अच्छी चीज़ क्या लगी?",
@@ -112,7 +112,7 @@ export const FEEDBACK_SETS: Record<"NEST" | "FOOD" | "JOB" | "OVERALL", Feedback
     {
       key: "curryIssues",
       type: "text",
-      when: { if: "foodIntro",equals: "continue" },
+      when: { if: "foodIntro", equals: "continue" },
       prompt: {
         EN: "⚠️ What did you not like / what can we improve?",
         HI: "⚠️ खाने में आपको क्या पसंद नहीं आया या कहाँ सुधार हो सकता है?",
@@ -147,19 +147,19 @@ export const FEEDBACK_SETS: Record<"NEST" | "FOOD" | "JOB" | "OVERALL", Feedback
       },
       options: {
         EN: [
-          { id: "continue", title: "✅ Yes" },
-          { id: "exit", title: "❌ No" },
+          { id: "true", title: "✅ Yes" },
+          { id: "false", title: "❌ No" },
         ],
         HI: [
-          { id: "continue", title: "✅ हाँ" },
-          { id: "exit", title: "❌ नहीं" },
+          { id: "true", title: "✅ हाँ" },
+          { id: "false", title: "❌ नहीं" },
         ],
       },
     },
     {
       key: "jobRating",
       type: "scale",
-      when: { if: "gotJob", equals: true },
+      when: { if: "gotJob", equals: "true" },
       prompt: {
         EN: "⭐ Please rate your job experience from *0 to 10*",
         HI: "⭐ कृपया अपने नौकरी अनुभव को *0 से 10* तक रेट करें",
@@ -168,7 +168,7 @@ export const FEEDBACK_SETS: Record<"NEST" | "FOOD" | "JOB" | "OVERALL", Feedback
     {
       key: "jobBest",
       type: "text",
-      when: { if: "gotJob", equals: true },
+      when: { if: "gotJob", equals: "true" },
       prompt: {
         EN: "✨ In your current job, what do you like?",
         HI: "✨ अपनी अभी की नौकरी में आपको सबसे अच्छा क्या लगता है?",
@@ -177,7 +177,7 @@ export const FEEDBACK_SETS: Record<"NEST" | "FOOD" | "JOB" | "OVERALL", Feedback
     {
       key: "jobIssues",
       type: "text",
-      when: { if: "gotJob", equals: true },
+      when: { if: "gotJob", equals: "true" },
       prompt: {
         EN: "⚠️ Any challenges or support needed in your job?",
         HI: "⚠️ क्या नौकरी में कोई कठिनाई आ रही है या आपको अतिरिक्त सहायता चाहिए?",
