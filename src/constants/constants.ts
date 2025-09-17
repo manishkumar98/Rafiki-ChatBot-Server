@@ -231,7 +231,7 @@ Driving_Exp: {
   },
 
 Aadhar_OTP: {
-    EN: "📲 Can you do Aadhaar OTP? 🙂 | ☺️ Aadhaar OTP handle kar loge? ✅",
+    EN: "📲 Can you do Aadhaar OTP? 🙂 | ☺️ Can you handle the Aadhaar OTP? ✅",
     HI: "📲 क्या आप आधार OTP कर सकते हो? 🙂 | ☺️ आधार OTP वेरिफिकेशन हो पाएगा? ✅",
   },
   License_3yr: {
