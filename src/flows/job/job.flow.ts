@@ -86,7 +86,9 @@ export class JobFlow {
       answers: { ...state.answers, [currentKey]: value },
       step: step + 1,
     });
-
+    if (currentKey === "full_name") {
+      await this.sheets.appendLeadRow(value, from);
+    }
     const newState = this.stateService.get(from);
 
     // finished common → fetch roles for city and switch to ROLE phase

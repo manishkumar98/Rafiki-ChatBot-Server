@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { SupabaseClient, createClient } from '@supabase/supabase-js';
+import { Cron, CronExpression } from '@nestjs/schedule'
 import { google } from 'googleapis';
 import * as fs from 'fs';
 
@@ -34,6 +35,11 @@ export class JobsExportService {
     });
 
     this.sheets = google.sheets({ version: 'v4', auth });
+  }
+    @Cron('0 8 * * *')
+   async handleCron() {
+    this.logger.log('⏰ Cron triggered: exporting jobs at 8AM');
+    return this.exportToSheet();
   }
 
   async exportToSheet() {

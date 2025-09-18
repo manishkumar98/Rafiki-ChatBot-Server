@@ -308,4 +308,46 @@ async readNumbers(): Promise<{ phone: string; type: string }[]> {
     .filter((r) => r !== null) as { phone: string; type: string }[];
 }
 
+async appendLeadRow(fullName: string|undefined, phone: string) {
+  const spreadsheetId = process.env.SPREADSHEET_ID;
+  const sheetName = "Leads";
+
+  // fetch existing headers
+  const headersRes = await this.sheets.spreadsheets.values.get({
+    spreadsheetId,
+    range: `${sheetName}!1:1`,
+  });
+
+  let headers: string[] = headersRes.data.values?.[0] || [];
+
+  // enforce fixed headers
+  const fixedHeaders = ["phone", "full_name", "timestamp"];
+  headers = [...fixedHeaders, ...headers.filter((h) => !fixedHeaders.includes(h))];
+
+  // prepare row
+  const valuesRow = headers.map((key) => {
+    if (key === "phone") return phone;
+    if (key === "full_name") return fullName;
+    if (key === "timestamp") return new Date().toLocaleString();
+    return "";
+  });
+
+  // ensure headers exist
+  await this.sheets.spreadsheets.values.update({
+    spreadsheetId,
+    range: `${sheetName}!A1`,
+    valueInputOption: "USER_ENTERED",
+    requestBody: { values: [headers] },
+  });
+
+  // append row
+  await this.sheets.spreadsheets.values.append({
+    spreadsheetId,
+    range: `${sheetName}!A1`,
+    valueInputOption: "USER_ENTERED",
+    requestBody: { values: [valuesRow] },
+  });
+}
+
+
 }
