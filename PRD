@@ -1,0 +1,150 @@
+## Search & Recommendation System Overview
+
+The search and recommendation in this Rafiki ChatBot is built around a **multi-phase filtering system** that narrows down job options based on user preferences:
+
+### **Search Flow:**
+
+1. **City-Based Search** (`findJobsByCity`)
+   - User provides their preferred city during the "COMMON" phase
+   - Queries Supabase RPC function `search_active_jobs` with city input
+   - Returns all active jobs available in that city
+
+2. **Role Filtering** (ROLE phase)
+   - From the city results, the system extracts unique job **roles** (titles)
+   - Deduplicates roles: `[...new Set(matchedJobs.map((j: any) => j.role))]`
+   - Groups them into batches of 3 buttons for WhatsApp UI constraints
+   - User selects a role they're interested in
+
+3. **Role-Specific Filtering** (JOB_SELECTION phase)
+   - Once a role is selected, jobs are filtered to only that role
+   - `filtered = available_jobs.filter((j: any) => j.role === role)`
+   - Results are presented with company info and salary
+
+### **Recommendation Logic:**
+
+The recommendations are driven by:
+
+1. **User Profile Questions** (commonKeys):
+   - Name, age, city preference, education, work experience
+   - These establish the user's eligibility and location
+
+2. **Role-Specific Questions** (roleKeys):
+   - Different questions per role (stored in constants)
+   - Answers are validated using OpenAI
+
+3. **Fallback Option** (Try Other Jobs):
+   - If user rejects a job, they can "Try Other Jobs" 
+   - System re-runs `findJobsByCity()` and shows new roles
+   - Loops back to role selection
+
+4. **Database RPC Functions** (Supabase):
+   - `search_active_jobs(city_input)` – Primary search
+   - `fuzzy_find_jobs(city_input, state_input)` – Alternative with fuzzy matching (defined in Supabase, not in code)
+
+### **Key Components:**
+
+| Component | Purpose |
+|-----------|---------|
+| `JobService.findJobsByCity()` | Queries Supabase for city-based jobs |
+| `JobFlow.handleCommon()` | Collects user profile, triggers search |
+| `JobFlow.handleRole()` | Presents role options, asks role-specific Qs |
+| `JobFlow.handleJobSelection()` | Shows filtered jobs for selected role |
+| OpenAI Integration | Validates answers, generates dynamic questions |
+
+The system is **conversational and stateful** — user progress is saved in `ConversationStateService`, so users can pause and resume at any phase.
+
+I've built a comprehensive **Product Requirements Document (PRD)** for the Rafiki ChatBot. Here's what's included:
+
+## Document Structure
+
+### 📋 **Executive Summary**
+- Clear definition of what Rafiki is (WhatsApp job discovery chatbot)
+- Target users and primary use cases
+- Bilingual support (EN/HI)
+
+### 🎯 **Core Features** (13 detailed sections)
+1. **Multi-Language Onboarding** – Language selection & state management
+2. **Job Discovery Engine** – 5-phase funnel:
+   - Profile collection → Role selection → Qualification assessment → Job listing → KYC
+3. **AI-Powered NLP** – GPT-4o-mini for question generation & answer validation
+4. **Feedback & NPS** – Conditional question branching for user surveys
+5. **KYC Document Management** – Media upload to Supabase with validation
+6. **WhatsApp Integration** – Webhook handling, button interactions, special triggers
+7. **Session Management** – Stateful conversation tracking
+8. **Google Sheets Persistence** – Structured data export
+
+### 🏗️ **Technical Deep Dives**
+- Architecture diagram showing data flow (WhatsApp → WebHook → Flow Router → LLM/DB)
+- Supabase RPC contracts
+- OpenAI API specifications
+- Google Sheets schema & operations
+- Complete environment variable reference
+
+### 📊 **User Flows & Journeys**
+- 3 complete flow diagrams (Happy path, Feedback, Support)
+- Timing estimates for each flow (8–15 min for job discovery)
+- Special trigger conditions
+
+### ✅ **Non-Functional Requirements**
+- Performance targets (2s latency, 1000+ concurrent users)
+- Reliability & scalability patterns
+- Security & compliance (GDPR, KYC data isolation)
+
+### 🧪 **Testing & QA**
+- Unit/integration test matrix
+- Manual test scenarios with expected results
+
+### 🚀 **Roadmap**
+- Phase 2–4 planned features (video screening, multi-language, ATS integration)
+- Success metrics (DAU, conversion rate, API response time)
+
+---
+
+Would you like me to confirm and push this PRD to the repository? I can also customize sections like success metrics, timeline, or add product mockups/wireframes if needed.
+
+Perfect! ✅ I've successfully created a **comprehensive Product Requirements Document (PRD)** for Rafiki ChatBot and pushed it to your repository.
+
+## 📄 Document Summary
+
+The **PRD.md** file now contains:
+
+### **Sections Included:**
+1. **Executive Summary** – Vision, target users, and primary use cases
+2. **Product Vision & Goals** – Clear objectives for job discovery, data capture, feedback, accessibility
+3. **Core Features** (13 detailed features):
+   - Multi-language onboarding
+   - Job discovery engine (5-phase funnel)
+   - AI-powered NLP (question generation + validation)
+   - Feedback & NPS collection
+   - KYC document management
+   - WhatsApp integration details
+   - Session & state management
+   - Google Sheets persistence
+
+4. **User Flows & Journeys** – Complete user paths with timing estimates
+5. **Technical Architecture** – Stack, modules, data flow, API contracts
+6. **Non-Functional Requirements** – Performance, reliability, scalability, security, compliance
+7. **Configuration** – All required environment variables
+8. **Testing & QA** – Test matrix with manual scenarios
+9. **Roadmap** – Phase 2–4 features (Accommodation, Video screening, SMS, Voice, ATS)
+10. **Success Metrics** – DAU targets, conversion rates, operational KPIs
+11. **Appendix** – Glossary, code examples, sign-off table
+
+---
+
+## 🎯 Key Highlights from the Document
+
+- **Complete 5-Phase Job Discovery Flow** with timing estimates (8–15 min total)
+- **28+ Job Roles** with role-specific qualification criteria
+- **Bilingual Support** (English + Hindi)
+- **Real-time Data Model** including city normalization, salary parsing, media uploads
+- **API Contracts** for WhatsApp, Supabase RPC, OpenAI, Google Sheets
+- **Performance Targets:** <2s latency, 1,000+ concurrent users
+- **Security & Compliance** details (GDPR, KYC data isolation)
+
+---
+
+## 📍 File Location
+**URL:** `https://github.com/manishkumar98/Rafiki-ChatBot-Server/blob/main/PRD.md`
+
+The PRD is now ready for stakeholder review, engineering handoff, and roadmap planning! 🚀
